@@ -1,12 +1,23 @@
 <?php
 /**
- * Plugin Name: Site Editor Admin Links
+ * Site Editor Admin Links
  *
  * @package SiteEditorLinks
+ * @author  Brian Coords
+ *
+ * @wordpress-plugin
+ * Plugin Name:       Site Editor Admin Links
+ * Description:       Show links to edit currently visible block templates in the admin bar.
+ * Version:           0.0.1
+ * Requires at least: 6.0
+ * Author:            Brian Coords
+ * Author URI:        https://www.briancoords.com
  */
 
 /**
  * Renders our admin bar nodes.
+ *
+ * @since 0.0.1
  *
  * @return void
  */
@@ -17,14 +28,6 @@ function bc_site_editor_admin_bar_render() {
 	global $wp_admin_bar;
 	global $_wp_current_template_content;
 
-	$wp_admin_bar->add_node(
-		array(
-			'id'    => 'bc_site_editor_links',
-			'title' => __( 'Site Editor Links' ),
-			'href'  => '',
-		)
-	);
-	$blocks        = parse_blocks( $_wp_current_template_content );
 	$base_url      = admin_url( 'site-editor.php' );
 	$main_template = bc_false_template_loader();
 	if ( $main_template ) {
@@ -32,13 +35,15 @@ function bc_site_editor_admin_bar_render() {
 		$url = add_query_arg( 'postId', rawurlencode( $main_template->theme . '//' . $main_template->slug ), $url );
 		$wp_admin_bar->add_node(
 			array(
-				'parent' => 'bc_site_editor_links',
+				'parent' => 'site-editor',
 				'id'     => 'bc_site_editor_links_template',
 				'title'  => $main_template->theme . '/' . $main_template->slug,
 				'href'   => $url,
 			)
 		);
 	}
+
+	$blocks = parse_blocks( $_wp_current_template_content );
 	if ( $blocks ) {
 		foreach ( $blocks as $i => $block ) {
 			if ( 'core/template-part' === $block['blockName'] ) {
@@ -46,7 +51,7 @@ function bc_site_editor_admin_bar_render() {
 				$url = add_query_arg( 'postId', rawurlencode( $block['attrs']['theme'] . '//' . $block['attrs']['slug'] ), $url );
 				$wp_admin_bar->add_node(
 					array(
-						'parent' => 'bc_site_editor_links',
+						'parent' => 'site-editor',
 						'id'     => 'bc_site_editor_links_' . $i,
 						'title'  => $block['attrs']['theme'] . '/' . $block['attrs']['slug'],
 						'href'   => $url,
@@ -63,6 +68,8 @@ add_action( 'admin_bar_menu', 'bc_site_editor_admin_bar_render', 99 );
 
 /**
  * A fake function to mimic what happens in wp-includes/template-loader.php
+ *
+ * @since 0.0.1
  *
  * @return object
  */
